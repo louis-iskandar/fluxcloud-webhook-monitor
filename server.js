@@ -14,7 +14,7 @@ const chalk = require("chalk");
   dashboard to be publicly accessible since it may contain sensitive data.
 */
 
-// The first Express server will serve Stripe Monitor (on a different port).
+// The first Express server will serve Fluxcloud Monitor (on a different port).
 const monitor = express();
 const monitorServer = http.Server(monitor);
 // We'll set up Socket.io to notify us of new events
@@ -24,7 +24,7 @@ let recentEvents = [];
 // Serve static files and start the server
 monitor.use(express.static(path.join(__dirname, "public")));
 monitorServer.listen(config.port, () => {
-  console.log(`Stripe Monitor is up: http://localhost:${config.port}`);
+  console.log(`Fluxcloud Monitor is up: http://localhost:${config.port}`);
 });
 
 // Provides environment details: the Dashboard URL will vary based on whether we're in test or live mode

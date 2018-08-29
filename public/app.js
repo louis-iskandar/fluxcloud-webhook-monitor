@@ -756,7 +756,7 @@ const app = new Vue({
     <div id="app">
       <header class="app-header">
         <nav>
-          <router-link tag="h1" :to="{ path: '/' }" exact><a>Stripe Monitor</a></router-link>
+          <router-link tag="h1" :to="{ path: '/' }" exact><a>Fluxcoud Monitor</a></router-link>
           <router-link tag="h2" :to="{ path: '/' }" exact><a>Logs</a></router-link>
           <router-link tag="h2" :to="{ path: 'charts'}"><a>Charts</a></router-link>
         </nav>
