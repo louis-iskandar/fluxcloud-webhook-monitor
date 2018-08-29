@@ -1,8 +1,6 @@
 "use strict";
 
 const config = require("./config.js");
-const boxen = require("boxen");
-const stripe = require("stripe")(config.stripe.secretKey);
 const express = require("express");
 const socketio = require("socket.io");
 const http = require("http");
@@ -40,8 +38,8 @@ monitor.get("/environment", async (req, res) => {
 
 // Provides the 20 most recent events (useful when the app first loads)
 monitor.get("/recent-events", async (req, res) => {
-  let response = await stripe.events.list({ limit: 20 });
-  recentEvents = response.data;
+  // let response = await stripe.events.list({ limit: 20 });
+  // recentEvents = response.data;
   res.send(recentEvents);
 });
 
@@ -59,6 +57,8 @@ webhooks.post("/", async (req, res) => {
   let event = req.body;
   // Send a notification that we have a new event
   // Here we're using Socket.io, but server-sent events or another mechanism can be used.
+  console.log(event)
+  recentEvents.push(event)
   io.emit("event", event);
   // Stripe needs to receive a 200 status from any webhooks endpoint
   res.sendStatus(200);

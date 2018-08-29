@@ -62,13 +62,13 @@ store.togglePausedEvents = function togglePausedEvents() {
 // Add an event to the store
 store.addEvent = function addEvent(event) {
   // Track the event type  (so we can filter by them)
-  if (store.eventTypes.indexOf(event.type) === -1) {
-    store.eventTypes.push(event.type);
-    Vue.set(store.eventColors, event.type, store.colors.shift());
-    Vue.set(store.eventCount, event.type, 1);
+  if (store.eventTypes.indexOf(event.Event.type) === -1) {
+    store.eventTypes.push(event.Event.type);
+    Vue.set(store.eventColors, event.Event.type, store.colors.shift());
+    Vue.set(store.eventCount, event.Event.type, 1);
   } else {
-    let count = store.eventCount[event.type];
-    Vue.set(store.eventCount, event.type, count + 1);
+    let count = store.eventCount[event.Event.type];
+    Vue.set(store.eventCount, event.Event.type, count + 1);
   }
   // If the event stream is paused, add the event to a silent queue
   if (store.eventsPaused) {
@@ -210,15 +210,15 @@ Vue.component("event", {
   data() {
     return {
       store,
-      showingJSON: false,
-      showingMetadata: false,
-      metadata: this.event.data.object.metadata
+      showingJSON: false
+      //showingMetadata: false,
+      //metadata: this.event.data.object.metadata
     };
   },
   computed: {
     // Generate a human-readable event type
     eventType() {
-      return store.humanEventType(this.event.type);
+      return store.humanEventType(this.event.Event.type);
     },
     // Use a specific color for some types of events
     eventColor() {
@@ -236,7 +236,7 @@ Vue.component("event", {
     },
     // For some types of events, show a summary
     summary() {
-      let evt = this.event.data.object;
+      let evt = this.event;
       // Render an HTML link to the Stripe Dashboard
       const url = (route, text) => {
         return `<a target="_blank" href="${store.dashboardUrl}${route}">${text}</a>`;
@@ -248,6 +248,7 @@ Vue.component("event", {
       // Render a date: takes a timestamp (milliseconds since epoch)
       const date = timestamp => moment(timestamp).format("MMMM Do, YYYY");
 
+      /* 
       if (this.event.type === "account.external_account.created") {
         return `A new external account was created.`;
       } else if (this.event.type === "account.external_account.deleted") {
@@ -256,238 +257,7 @@ Vue.component("event", {
         return `A new external account was updated.`;
       } else if (this.event.type === "account.updated") {
         return `The Stripe account was updated.`;
-      } else if (this.event.type === "balance.available") {
-        return `The balance for this Stripe account was updated:
-        ${currency(
-          evt.available[0].amount / 100,
-          evt.available.currency
-        )} is available,
-        ${currency(
-          evt.pending[0].amount / 100,
-          evt.pending.currency
-        )} is pending.`;
-      } else if (this.event.type === "charge.captured") {
-        return `Customer ${url("customers/" + evt.customer, evt.customer)}'s'
-          charge for ${currency(evt.amount / 100, evt.currency)} was
-          ${url("charges/" + evt.id, "captured")}.`;
-      } else if (this.event.type === "charge.dispute.closed") {
-        return `The ${url("disputes/" + evt.id, "dispute")} for a
-          ${url("charges/" + evt.charge, "charge")} was closed.`;
-      } else if (this.event.type === "charge.dispute.created") {
-        return `The ${url("disputes/" + evt.id, "dispute")} for a
-          ${url("charges/" + evt.charge, "charge")} was created.`;
-      } else if (this.event.type === "charge.dispute.funds_reinstated") {
-        return `${currency(
-          evt.amount / 100,
-          evt.currency
-        )} was reinstated to the
-          Stripe account following a ${url("disputes/" + evt.id, "dispute")}.`;
-      } else if (this.event.type === "charge.dispute.funds_withdrawn") {
-        return `${currency(
-          evt.amount / 100,
-          evt.currency
-        )} was withdrawn from the
-          Stripe account following a ${url("disputes/" + evt.id, "dispute")}.`;
-      } else if (this.event.type === "charge.dispute.updated") {
-        return `The ${url("disputes/" + evt.id, "dispute")} for a
-          ${url("charges/" + evt.charge, "charge")} was updated.`;
-      } else if (this.event.type === "charge.failed") {
-        return `A recent ${url("charges/" + evt.id, "charge")} for
-          ${currency(evt.amount / 100, evt.currency)} failed.`;
-      } else if (this.event.type === "charge.pending") {
-        return `A recent ${url("charges/" + evt.id, "charge")} for
-          ${currency(evt.amount / 100, evt.currency)} is pending.`;
-      } else if (this.event.type === "charge.refund.updated") {
-        return `A ${currency(evt.amount / 100, evt.currency)} refund for a
-        ${url("charges/" + evt.id, "charge")} was updated.`;
-      } else if (this.event.type === "charge.refunded") {
-        return `A ${currency(evt.amount / 100, evt.currency)}
-          ${url("charges/" + evt.id, "charge")} was refunded.`;
-      } else if (this.event.type === "charge.succeeded") {
-        return `A ${url("customers/" + evt.customer, "customer")}
-          was charged ${currency(evt.amount / 100, evt.currency)}
-          with a ${evt.source.brand} ${evt.source.funding} ${evt.source
-          .object}.`;
-      } else if (this.event.type === "charge.updated") {
-        return `A ${currency(evt.amount / 100, evt.currency)}
-          ${url("charges/" + evt.id, "charge")} was updated.`;
-      } else if (this.event.type === "coupon.created") {
-        return `A coupon was created.`;
-      } else if (this.event.type === "coupon.deleted") {
-        return `A coupon was deleted.`;
-      } else if (this.event.type === "coupon.updated") {
-        return `A coupon was updated.`;
-      } else if (this.event.type === "customer.bank_account.deleted") {
-        return `A ${url("customers/" + evt.id, "customer")}'s bank account was
-          deleted.`;
-      } else if (this.event.type === "customer.created") {
-        return `A ${url("customers/" + evt.id, "new customer")}
-          ${evt.email ? "(" + evt.email + ")" : ""} was created.`;
-      } else if (this.event.type === "customer.deleted") {
-        return `A ${url("customers/" + evt.id, " customer")}
-          ${evt.email ? "(" + evt.email + ")" : ""} was deleted.`;
-      } else if (this.event.type === "customer.discount.created") {
-        return `A discount for a ${url("customers/" + evt.id, "customer")} was
-          created.`;
-      } else if (this.event.type === "customer.discount.deleted") {
-        return `A discount for a ${url("customers/" + evt.id, "customer")} was
-          deleted.`;
-      } else if (this.event.type === "customer.discount.updated") {
-        return `A discount for a ${url("customers/" + evt.id, "customer")} was
-          updated.`;
-      } else if (this.event.type === "customer.source.created") {
-        return `A ${url("customers/" + evt.customer, "customer")} added a new
-          payment source.`;
-      } else if (this.event.type === "customer.source.deleted") {
-        return `A ${url("customers/" + evt.customer, "customer")} deleted a
-          payment source.`;
-      } else if (this.event.type === "customer.source.updated") {
-        return `A ${url("customers/" + evt.customer, "customer")} updated a
-          payment source.`;
-      } else if (this.event.type === "customer.subscription.created") {
-        return `A ${url("customers/" + evt.customer, "customer")}
-          created a new ${url("subscriptions/" + evt.id, "subscription")} to the
-          ${url("plans/" + evt.plan.id, evt.plan.name)} plan.`;
-      } else if (this.event.type === "customer.subscription.deleted") {
-        return `A ${url("customers/" + evt.customer, "customer")}
-          deleted a ${url("subscriptions/" + evt.id, "subscription")} to the
-          ${url("plans/" + evt.plan.id, evt.plan.name)} plan.`;
-      } else if (this.event.type === "customer.subscription.trial_will_end") {
-        return `A ${url("customers/" + evt.customer, "customer")}'s trial
-          ${url("subscriptions/" + evt.id, "subscription")} will end on
-          ${date(evt.trial_end)}.`;
-      } else if (this.event.type === "customer.subscription.updated") {
-        return `A ${url("customers/" + evt.customer, "customer")}'s
-          ${url("subscriptions/" + evt.id, "subscription")} was updated.`;
-      } else if (this.event.type === "customer.updated") {
-        return `A ${url("customers/" + evt.customer, "customer")} was updated.`;
-      } else if (this.event.type === "file.created") {
-        return `A new file was uploded.`;
-      } else if (this.event.type === "invoice.created") {
-        return `A ${url("customers/" + evt.customer, "customer")}'s
-          ${url("invoices/" + evt.id, "invoice")} was created.`;
-      } else if (this.event.type === "invoice.payment_failed") {
-        return `A ${url("customers/" + evt.customer, "customer")}'s
-          ${url("invoices/" + evt.id, "invoice")} invoice payment failed.`;
-      } else if (this.event.type === "invoice.payment_succeeded") {
-        return `A ${url("customers/" + evt.customer, "customer")}'s
-          ${url("invoices/" + evt.id, "invoice")} was successfully charged.`;
-      } else if (this.event.type === "invoice.sent") {
-        return `A ${url("customers/" + evt.customer, "customer")}'s
-          ${url("invoices/" + evt.id, "invoice")} was sent.`;
-      } else if (this.event.type === "invoice.upcoming") {
-        return `A ${url("customers/" + evt.customer, "customer")}'s
-          ${url("invoices/" + evt.id, "invoice")} was updated.`;
-      } else if (this.event.type === "invoice.updated") {
-        return `A ${url("customers/" + evt.customer, "customer")}'s
-          ${url("invoices/" + evt.id, "invoice")} was updated.`;
-      } else if (this.event.type === "invoiceitem.created") {
-        return `A ${url(
-          "customers/" + evt.customer,
-          "customer"
-        )} created an invoice
-          item${evt.invoice
-            ? " for an " + url("invoices/" + evt.invoice, "invoice")
-            : ""}.`;
-      } else if (this.event.type === "invoiceitem.deleted") {
-        return `A ${url(
-          "customers/" + evt.customer,
-          "customer"
-        )} deleted an invoice
-          item${evt.invoice
-            ? " for an " + url("invoices/" + evt.invoice, "invoice")
-            : ""}.`;
-      } else if (this.event.type === "invoiceitem.updated") {
-        return `A ${url(
-          "customers/" + evt.customer,
-          "customer"
-        )} updated an invoice
-          item${evt.invoice
-            ? " for an " + url("invoices/" + evt.invoice, "invoice")
-            : ""}.`;
-      } else if (this.event.type === "order.created") {
-        return `A new ${url("orders/" + evt.id, "order")} for
-          ${currency(evt.amount / 100)} was created.`;
-      } else if (this.event.type === "order.payment_failed") {
-        return `A payment failed for an ${url("orders/" + evt.id, "order")} for
-          ${currency(evt.amount / 100)}.`;
-      } else if (this.event.type === "order.payment_succeeded") {
-        return `A payment succeeded for an ${url(
-          "orders/" + evt.id,
-          "order"
-        )} for
-          ${currency(evt.amount / 100)}.`;
-      } else if (this.event.type === "order.updated") {
-        return `An ${url("orders/" + evt.id, "order")} for
-          ${currency(evt.amount / 100)} was updated.`;
-      } else if (this.event.type === "order_return.created") {
-        return `A return was created for an ${url(
-          "orders/" + evt.order,
-          "order"
-        )}
-        for ${currency(evt.amount / 100)}.`;
-      } else if (this.event.type === "payout.canceled") {
-        return `A payout of ${currency(evt.amount / 100)} was canceled.`;
-      } else if (this.event.type === "payout.created") {
-        return `A payout of ${currency(evt.amount / 100)} was initiated.`;
-      } else if (this.event.type === "payout.failed") {
-        return `A payout of ${currency(evt.amount / 100)} was failed.`;
-      } else if (this.event.type === "payout.paid") {
-        return `A payout of ${currency(evt.amount / 100)} was paid.`;
-      } else if (this.event.type === "payout.updated") {
-        return `A payout of ${currency(evt.amount / 100)} was updated.`;
-      } else if (this.event.type === "plan.created") {
-        return `Plan ${url("plans/" + evt.id, evt.name)} was created.`;
-      } else if (this.event.type === "plan.deleted") {
-        return `Plan ${evt.name} was deleted.`;
-      } else if (this.event.type === "plan.updated") {
-        return `Plan ${evt.name} was updated.`;
-      } else if (this.event.type === "product.created") {
-        return `A new ${url("products/" + evt.id, "product")} was created.`;
-      } else if (this.event.type === "product.deleted") {
-        return `A ${url("products/" + evt.id, "product")} was deleted.`;
-      } else if (this.event.type === "product.updated") {
-        return `A ${url("products/" + evt.id, "product")} was updated.`;
-      } else if (this.event.type === "recipient.created") {
-        return `A new recipient was created.`;
-      } else if (this.event.type === "recipient.deleted") {
-        return `A new recipient was deleted.`;
-      } else if (this.event.type === "recipient.updated") {
-        return `A new recipient was updated.`;
-      } else if (this.event.type === "review.closed") {
-        return `A fraud review was closed.`;
-      } else if (this.event.type === "review.opened") {
-        return `A fraud review was opened.`;
-      } else if (this.event.type === "sku.created") {
-        return `A ${url(
-          "products/" + evt.product,
-          "product"
-        )} SKU was created.`;
-      } else if (this.event.type === "sku.deleted") {
-        return `A ${url(
-          "products/" + evt.product,
-          "product"
-        )} SKU was deleted.`;
-      } else if (this.event.type === "sku.updated") {
-        return `A ${url(
-          "products/" + evt.product,
-          "product"
-        )} SKU was updated.`;
-      } else if (this.event.type === "source.canceled") {
-        return `A payment source was canceled.`;
-      } else if (this.event.type === "source.chargeable") {
-        return `A payment source is now chargeable.`;
-      } else if (this.event.type === "source.failed") {
-        return `A payment source failed.`;
-      } else if (this.event.type === "source.transaction_created") {
-        return `A transaction was created for a payment source.`;
-      } else if (this.event.type === "transfer.created") {
-        return `A transfer was created.`;
-      } else if (this.event.type === "transfer.reversed") {
-        return `A transfer was reversed.`;
-      } else if (this.event.type === "transfer.updated") {
-        return `A transfer was updated.`;
-      }
+      } */
     }
   },
   filters: {
@@ -509,10 +279,9 @@ Vue.component("event", {
         <section class="details">
           <section class="text-description" :style="eventColor">
             <p class="summary" v-html="summary"></p>
-            <p class="description">{{ this.event.data.object.description }}</p>
+            <pre class="description">{{ this.event.Body }}</pre>
           </section>
         </section>
-        <button @click="viewDashboard">View on Stripe <i class="icon icon-right ion-chevron-right"></i></button>
       </section>
       <section class="event-data">
         <section :class="{expanded: showingJSON, showJSON: true}">
@@ -521,13 +290,6 @@ Vue.component("event", {
             <span v-if="showingJSON">Hide</span><span v-else>Inspect</span> JSON
           </p>
           <eventJSON v-if="showingJSON" :json="event"></eventJSON>
-        </section>
-        <section v-if="hasMetadata" :class="{expanded: showingMetadata, 'show-metadata': true}">
-          <p class="show-event-data" @click="showingMetadata = !showingMetadata" >
-            <i class="metadata-arrow icon ion-arrow-right-b"></i>
-            <span v-if="showingMetadata">Hide</span><span v-else>Show</span> metadata
-          </p>
-          <eventJSON v-if="showingMetadata" :json="metadata"></eventJSON>
         </section>
       </section>
     </div>
@@ -585,8 +347,8 @@ Vue.component("logs", {
     <section class="monitor has-options">
       <section :class="{eventList: true, 'options-sticky': store.optionsSticky}">
         <transition-group v-if="store.events.length > 0" name="eventList" tag="ul">
-          <li v-for="evt in store.events" :key="evt.id">
-            <event v-if="store.filteredHidden.indexOf(evt.type) === -1" :event="evt"></event>
+          <li v-for="evt in store.events" :key="evt">
+            <event v-if="store.filteredHidden.indexOf(evt.Event.type) === -1" :event="evt"></event>
           </li>
         </transition-group>
         <p v-else-if="store.loading === true">Loading...</p>
