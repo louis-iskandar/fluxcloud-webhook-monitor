@@ -64,34 +64,3 @@ webhooks.post("/", async (req, res) => {
   res.sendStatus(200);
 });
 
-// Use ngrok to provide a public URL for receiving webhooks
-if (config.ngrok.enabled) {
-  const ngrok = require("ngrok");
-  const boxen = require("boxen");
-
-  ngrok.connect(
-    {
-      addr: webhooksPort,
-      subdomain: config.ngrok.subdomain,
-      authtoken: config.ngrok.authtoken
-    },
-    function(err, url) {
-      if (err) {
-        console.log(err);
-        if (err.code === "ECONNREFUSED") {
-          console.log(
-            chalk.red(`Connection refused at ${err.address}:${err.port}`)
-          );
-          process.exit(1);
-        }
-        console.log(chalk.yellow(`ngrok reported an error: ${err.msg}`));
-        console.log(
-          boxen(err.details.err.trim(), {
-            padding: { top: 0, right: 2, bottom: 0, left: 2 }
-          })
-        );
-      }
-      console.log(` └ Public URL for receiving Stripe webhooks: ${url}`);
-    }
-  );
-}
