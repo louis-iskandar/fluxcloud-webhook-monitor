@@ -6,4 +6,4 @@ WORKDIR /app
 
 RUN npm install
 
-CMD npm startdoc
+CMD npm start
