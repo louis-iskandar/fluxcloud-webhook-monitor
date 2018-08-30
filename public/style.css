@@ -61,6 +61,8 @@ button:hover, button.active {
   display: flex;
   flex-direction: row;
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
 }
 
 .app-header nav {
@@ -305,7 +307,7 @@ button:hover, button.active {
 
 /* Monitor options */
 .monitor {
-  position: relative;
+/*  position: relative; */
   height: 100%;
 }
 
@@ -316,6 +318,9 @@ button:hover, button.active {
   background: #f6f9fc;
   padding: 20px 25px;
   transition: right 0.2s ease-in-out;
+  position: fixed;
+  right: 0;
+  width: 250
 }
 
 .monitor-options.sticky {
