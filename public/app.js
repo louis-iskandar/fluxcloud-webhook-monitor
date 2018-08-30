@@ -166,7 +166,7 @@ store.startTrackingStats = function startTrackingStats() {
 // Get basic information on our Stripe environment
 async function getStripeInfo() {
   try {
-    let response = await fetch("/environment");
+    let response = await fetch("./environment");
     if (response.status === 200) {
       let stripeInfo = await response.json();
       store.dashboardUrl = stripeInfo.dashboardUrl;
@@ -180,7 +180,7 @@ async function getStripeInfo() {
 async function subscribeEvents() {
   // Fetch the most recent events from the server
   try {
-    let response = await fetch("/recent-events");
+    let response = await fetch("./recent-events");
     if (response.status === 200) {
       let recentEvents = await response.json();
       for (event of recentEvents) {
@@ -193,7 +193,8 @@ async function subscribeEvents() {
 
   store.loading = false;
   // Subscribe to new events via Socket.io
-  store.socket = io.connect();
+  urlpath = window.location.pathname
+  store.socket = io.connect({path: urlpath + 'socket.io'});
   // Whenever we receive an event via Socket.io, update our store
   store.socket.on("event", event => {
     if (event.type != "ping") {
