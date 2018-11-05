@@ -66,10 +66,15 @@ webhooks.post("/", async (req, res) => {
         const element = event.Event.metadata.result[key];
         if (element.Status != "ignored") {
           console.log('Key: ' + key);
-          // console.log('Element:');
-          // console.log(element);
+
+          var perContainer = "";
+          element.PerContainer.forEach(element => {
+            perContainer = perContainer + element.Target + '\n';
+          });
+
           var resultFileName = resultStorage + key.replace(':', '_').replace('/', '_') + '.png';
-          fs.writeFileSync(resultFileName, text2png(key + '\n' + 'Last deployment:' + '\n' + Date(), { color: 'blue' }));
+          fs.writeFileSync(resultFileName, text2png(key + '\n' + 'Last deployment:' + '\n' + perContainer + '\n' + Date(), { color: 'blue' }));
+          
           console.log('Result image written to ' + resultFileName);
         }
       }

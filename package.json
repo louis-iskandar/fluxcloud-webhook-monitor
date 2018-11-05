@@ -1,8 +1,8 @@
 {
-  "name": "stripe-webhook-monitor",
+  "name": "fluxcloud-webhook-monitor",
   "version": "1.0.0",
-  "description": "Realtime monitor for Stripe webhooks.",
-  "author": "Michael Glukhovsky <mg@stripe.com>",
+  "description": "Realtime monitor for Fluxcloud webhooks.",
+  "author": "Marcel Juhnke <marcel.juhnke@karrieretutor.de>",
   "license": "MIT",
   "main": "server.js",
   "scripts": {
