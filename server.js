@@ -29,15 +29,6 @@ monitorServer.listen(config.port, () => {
   console.log(`Fluxcloud Monitor is up: http://localhost:${config.port}`);
 });
 
-// Provides environment details: the Dashboard URL will vary based on whether we're in test or live mode
-monitor.get("/environment", async (req, res) => {
-  let dashboardUrl = "https://dashboard.stripe.com/";
-  if (config.stripe.secretKey.startsWith("sk_test")) {
-    dashboardUrl += "test/";
-  }
-  res.send({ dashboardUrl });
-});
-
 // Provides the 20 most recent events (useful when the app first loads)
 monitor.get("/recent-events", async (req, res) => {
   // let response = await stripe.events.list({ limit: 20 });
