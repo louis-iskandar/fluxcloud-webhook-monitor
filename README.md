@@ -27,6 +27,13 @@ npm install
 npm start
 ```
 
+### Local testing
+
+```
+curl -X POST http://localhost:4001 -H "Content-Type: application/json" -d @example_hook.json
+```
+
+
 ## Credits
 
 - Original Code: [Michael Glukhovsky](https://twitter.com/mglukhovsky)

@@ -6,7 +6,9 @@ const socketio = require("socket.io");
 const http = require("http");
 const bodyParser = require("body-parser");
 const path = require("path");
-const chalk = require("chalk");
+const fs = require('fs');
+const text2png = require('text2png');
+
 
 /*
   We use two different Express servers for security reasons: our webhooks
@@ -46,6 +48,7 @@ monitor.get("/recent-events", async (req, res) => {
 // The second Express server will receive webhooks
 const webhooks = express();
 const webhooksPort = config.port + 1;
+const resultStorage = path.join(__dirname, "public/resultimages/");
 
 webhooks.use(bodyParser.json());
 webhooks.listen(webhooksPort, () => {
@@ -57,8 +60,21 @@ webhooks.post("/", async (req, res) => {
   let event = req.body;
   // Send a notification that we have a new event
   // Here we're using Socket.io, but server-sent events or another mechanism can be used.
-  console.log(event)
-  recentEvents.push(event)
+  //console.log(event.Event.metadata.result);
+  for (const key in event.Event.metadata.result) {
+    if (event.Event.metadata.result.hasOwnProperty(key)) {
+      const element = event.Event.metadata.result[key];
+      if (element.Status != "ignored") {
+        console.log('Key: ' + key);
+        // console.log('Element:');
+        // console.log(element);
+        var resultFileName = resultStorage + key.replace(':', '_').replace('/', '_') + '.png';
+        fs.writeFileSync(resultFileName, text2png(key + '\n' + 'Last deployment:' + '\n' + Date(), {color: 'blue'}));
+        console.log('Result image written to ' + resultFileName);
+      }
+    }
+  };
+  recentEvents.push(event);
   io.emit("event", event);
   // Stripe needs to receive a 200 status from any webhooks endpoint
   res.sendStatus(200);
