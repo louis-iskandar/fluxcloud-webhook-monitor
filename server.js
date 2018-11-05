@@ -60,23 +60,31 @@ webhooks.post("/", async (req, res) => {
   let event = req.body;
   // Send a notification that we have a new event
   // Here we're using Socket.io, but server-sent events or another mechanism can be used.
-  //console.log(event.Event.metadata.result);
-  for (const key in event.Event.metadata.result) {
-    if (event.Event.metadata.result.hasOwnProperty(key)) {
-      const element = event.Event.metadata.result[key];
-      if (element.Status != "ignored") {
-        console.log('Key: ' + key);
-        // console.log('Element:');
-        // console.log(element);
-        var resultFileName = resultStorage + key.replace(':', '_').replace('/', '_') + '.png';
-        fs.writeFileSync(resultFileName, text2png(key + '\n' + 'Last deployment:' + '\n' + Date(), {color: 'blue'}));
-        console.log('Result image written to ' + resultFileName);
-      }
-    }
-  };
   recentEvents.push(event);
   io.emit("event", event);
+
   // Stripe needs to receive a 200 status from any webhooks endpoint
   res.sendStatus(200);
+
+  // If enabled, for each successful Deployment, generate a status image that can be referenced
+  // from somewhere else (like a GitHub repo)
+  if (config.generateResultImage) {
+    //console.log(event.Event.metadata.result);
+    for (const key in event.Event.metadata.result) {
+      if (event.Event.metadata.result.hasOwnProperty(key)) {
+        const element = event.Event.metadata.result[key];
+        if (element.Status != "ignored") {
+          console.log('Key: ' + key);
+          // console.log('Element:');
+          // console.log(element);
+          var resultFileName = resultStorage + key.replace(':', '_').replace('/', '_') + '.png';
+          fs.writeFileSync(resultFileName, text2png(key + '\n' + 'Last deployment:' + '\n' + Date(), { color: 'blue' }));
+          console.log('Result image written to ' + resultFileName);
+        }
+      }
+    };
+  }
+
+
 });
 
