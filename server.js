@@ -46,6 +46,22 @@ webhooks.listen(webhooksPort, () => {
   console.log(`Listening for webhooks: http://localhost:${webhooksPort}`);
 });
 
+
+const prometheus = require('prom-client');
+const register = prometheus.register;
+
+const counter = new prometheus.Counter({
+  name: 'fluxcloud_events_total',
+  help: 'The total number of events observed by fluxcloud',
+  labelNames: ['serviceID', 'eventType']
+});
+//counter.inc({method: 'GET', statusCode: '200'}, 1); // Inc with 1
+
+monitor.get('/metrics', (req, res) => {
+	res.set('Content-Type', register.contentType);
+	res.end(register.metrics());
+});
+
 // Provides an endpoint to receive webhooks
 webhooks.post("/", async (req, res) => {
   let event = req.body;
@@ -56,6 +72,11 @@ webhooks.post("/", async (req, res) => {
 
   // Stripe needs to receive a 200 status from any webhooks endpoint
   res.sendStatus(200);
+
+  // For each event and serviceID add to the corresponding counter
+  for (const serviceID of event.Event.serviceIDs) {
+    counter.inc({serviceID: serviceID, eventType: event.Event.type});
+  }
 
   // If enabled, for each successful Deployment, generate a status image that can be referenced
   // from somewhere else (like a GitHub repo)
